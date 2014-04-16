@@ -18,6 +18,8 @@ namespace bground
         private static readonly ContextMenu ContextMenu = new ContextMenu();
         private static readonly Timer Timer = new Timer();
         private static readonly IntPtr ThisConsole = GetConsoleWindow();
+        private static string CurrentPath;
+        private static Random Random = new Random();
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern IntPtr GetConsoleWindow();
@@ -76,7 +78,7 @@ namespace bground
                     return;
                 }
 
-                var path = args[1];
+                CurrentPath = args[1];
                 int interval;
                 if (args.Length >= 3 && int.TryParse(args[2], out interval))
                 {
@@ -84,12 +86,12 @@ namespace bground
 
                     Timer.Interval = interval * 1000;
                     Timer.Enabled = true;
-                    Timer.Tick += (sender, e) => SetRandomWallPaper(path);
-                    SetRandomWallPaper(path);
+                    Timer.Tick += (sender, e) => SetRandomWallPaper();
+                    SetRandomWallPaper();
                 }
                 else
                 {
-                    SetRandomWallPaper(path);
+                    SetRandomWallPaper();
                     return;
                 }
             }
@@ -156,9 +158,10 @@ namespace bground
 
                 TrayIcon.Icon = new Icon(icon);
                 TrayIcon.Visible = true;
-                TrayIcon.Text = "Right click to exit";
+                TrayIcon.Text = "Click to do thingies!";
                 TrayIcon.ContextMenu = ContextMenu;
-                TrayIcon.ContextMenu.MenuItems.Add(0, new MenuItem("Exit", (sender, e) => Quit()));
+                TrayIcon.ContextMenu.MenuItems.Add(0, new MenuItem("Next", (sender, e) => SetRandomWallPaper()));
+                TrayIcon.ContextMenu.MenuItems.Add(1, new MenuItem("Exit", (sender, e) => Quit()));
 
                 TrayIcon.Click += (sender, e) => typeof (NotifyIcon)
                     .GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic)
@@ -171,18 +174,17 @@ namespace bground
             Console.WriteLine("Usage: bround.exe (get|set <directory> [interval in seconds])");
         }
 
-        private static void SetRandomWallPaper(string path)
+        private static void SetRandomWallPaper()
         {
-            if (!Directory.Exists(path))
+            if (!Directory.Exists(CurrentPath))
             {
                 Console.WriteLine("Path was not found");
                 Quit();
             }
 
             SetWallPaperStyle();
-            SetWallPaper(RandomElement(
-                Directory.EnumerateFiles(path, "*.jpg"),
-                new Random()));
+            string file = RandomElement(Directory.EnumerateFiles(CurrentPath, "*.jpg"));
+            SetWallPaper(file);
         }
 
         private static void SetWallPaperStyle()
@@ -208,22 +210,19 @@ namespace bground
             throw new Win32Exception();
         }
 
-        public static T RandomElement<T>(IEnumerable<T> source, Random rng)
+        public static T RandomElement<T>(IEnumerable<T> source)
         {
-            T current = default(T);
-            int count = 0;
-            foreach (T element in source)
+            var current = default(T);
+            var count = 0;
+            foreach (var element in source)
             {
                 count++;
-                if (rng.Next(count) == 0)
+                if (Random.Next(count) == 0)
                 {
                     current = element;
                 }
             }
-            if (count == 0)
-            {
-                throw new InvalidOperationException("Sequence was empty");
-            }
+
             return current;
         }
     }
