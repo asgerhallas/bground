@@ -85,6 +85,7 @@ namespace bground
                     Timer.Interval = interval * 1000;
                     Timer.Enabled = true;
                     Timer.Tick += (sender, e) => SetRandomWallPaper(path);
+                    SetRandomWallPaper(path);
                 }
                 else
                 {
