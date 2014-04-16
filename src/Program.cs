@@ -7,8 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.Win32;
 using System.Windows.Forms;
+using Timer = System.Windows.Forms.Timer;
 
 namespace bground
 {
@@ -18,8 +20,8 @@ namespace bground
         private static readonly ContextMenu ContextMenu = new ContextMenu();
         private static readonly Timer Timer = new Timer();
         private static readonly IntPtr ThisConsole = GetConsoleWindow();
+        private static readonly Random Random = new Random();
         private static string CurrentPath;
-        private static Random Random = new Random();
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern IntPtr GetConsoleWindow();
@@ -69,6 +71,14 @@ namespace bground
                 Console.WriteLine(wallpaper.Substring(0, wallpaper.IndexOf('\0')));
                 return;
             }
+
+            if (command == "next")
+            {
+                var doneWithInit = new EventWaitHandle(false, EventResetMode.ManualReset, "MyWaitHandle");
+                doneWithInit.Set(); 
+                return;
+            }
+
 
             if (command == "set")
             {
@@ -174,7 +184,7 @@ namespace bground
             Console.WriteLine("Usage: bround.exe (get|set <directory> [interval in seconds])");
         }
 
-        private static void SetRandomWallPaper()
+        public static void SetRandomWallPaper()
         {
             if (!Directory.Exists(CurrentPath))
             {
