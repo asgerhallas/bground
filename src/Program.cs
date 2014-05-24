@@ -72,14 +72,6 @@ namespace bground
                 return;
             }
 
-            if (command == "next")
-            {
-                var doneWithInit = new EventWaitHandle(false, EventResetMode.ManualReset, "MyWaitHandle");
-                doneWithInit.Set(); 
-                return;
-            }
-
-
             if (command == "set")
             {
                 if (args.Length < 2)
@@ -154,6 +146,7 @@ namespace bground
 
                 process.Kill();
                 process.Dispose();
+                process.WaitForExit();
             }
         }
 
