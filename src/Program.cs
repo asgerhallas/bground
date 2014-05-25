@@ -72,6 +72,13 @@ namespace bground
                 return;
             }
 
+            if (command == "next")
+            {
+                CurrentPath = ReadPathFromFileOrDefault();
+                if (CurrentPath != null) SetRandomWallPaper();
+                return;
+            }
+
             if (command == "set")
             {
                 if (args.Length < 2)
@@ -81,6 +88,8 @@ namespace bground
                 }
 
                 CurrentPath = args[1];
+                WritePathToFile(CurrentPath);
+
                 int interval;
                 if (args.Length >= 3 && int.TryParse(args[2], out interval))
                 {
@@ -106,6 +115,18 @@ namespace bground
             GC.KeepAlive(handler);
 
             Application.Run();
+        }
+
+        static void WritePathToFile(string content)
+        {
+            File.WriteAllText("bground.current", content);
+        }
+
+        static string ReadPathFromFileOrDefault()
+        {
+            return File.Exists("bground.current") 
+                ? File.ReadAllText("bground.current") 
+                : null;
         }
 
         private static void Quit()
@@ -146,7 +167,6 @@ namespace bground
 
                 process.Kill();
                 process.Dispose();
-                process.WaitForExit();
             }
         }
 
