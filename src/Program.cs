@@ -71,14 +71,14 @@ namespace bground
                 Console.WriteLine(wallpaper.Substring(0, wallpaper.IndexOf('\0')));
                 return;
             }
-
+            
             if (command == "next")
             {
                 CurrentPath = ReadPathFromFileOrDefault();
                 if (CurrentPath != null) SetRandomWallPaper();
                 return;
             }
-
+            
             if (command == "set")
             {
                 if (args.Length < 2)
@@ -105,6 +105,11 @@ namespace bground
                     SetRandomWallPaper();
                     return;
                 }
+            }
+            else
+            {
+                WriteUsage();
+                return;
             }
 
             SetIcon();
